@@ -2,13 +2,6 @@ using Microsoft.AspNetCore.Mvc;
 using Ocelot.DependencyInjection;
 using Ocelot.Middleware;
 
-string s1 = null;
-var s2 = "1";
-var s3 = "2";
-
-var s4 = s1 ?? s2 ?? s3;
-
-
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Configuration.AddJsonFile("ocelot.json", optional: false, reloadOnChange: true);
@@ -27,7 +20,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-//app.UseHealthChecks("/health", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions { ResponseWriter = await (a,s) => { return new { } } });
+app.UseHealthChecks("/health");
 
-await app.UseOcelot();
+var ss = app.UseOcelot().GetAwaiter().GetResult;
+
 app.Run();
