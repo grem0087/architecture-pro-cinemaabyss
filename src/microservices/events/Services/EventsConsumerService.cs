@@ -1,5 +1,6 @@
 ﻿using Confluent.Kafka;
 using EventsService.Models;
+using Microsoft.Extensions.Logging;
 using System.Text.Json;
 
 namespace EventsService.Services;
@@ -21,21 +22,26 @@ public class EventConsumerService : BackgroundService
             EnableAutoCommit = true,
             EnableAutoOffsetStore = false
         };
-
+        _logger.LogInformation(configuration["KAFKA_BROKERS"] ?? "kafka:9092");
         _consumer = new ConsumerBuilder<Ignore, string>(consumerConfig).Build();
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        // Подписываемся на все три топика
+        
         _consumer.Subscribe(new[] { "user-events", "payment-events", "movie-events" });
-
         while (!stoppingToken.IsCancellationRequested)
         {
             try
             {
-                var consumeResult = _consumer.Consume(stoppingToken);
-
+                var consumeResult = _consumer.Consume(TimeSpan.FromMilliseconds(1000));
+                
+                if(consumeResult is null || consumeResult.Topic is null || consumeResult.Message.Value is null)
+                {
+                    await Task.Delay(100);
+                        continue;
+                };
+                
                 await ProcessMessageAsync(consumeResult.Topic, consumeResult.Message.Value);
 
                 _consumer.StoreOffset(consumeResult);
@@ -66,24 +72,23 @@ public class EventConsumerService : BackgroundService
             {
                 case "user-events":
                     var userEvent = JsonSerializer.Deserialize<UserEvent>(message);
-                    _logger.LogInformation("📱 UserEvent processed: UserId={UserId}, Action={Action}, Email={Email}",
+                    _logger.LogInformation("UserEvent processed: UserId={UserId}, Action={Action}, Email={Email}",
                         userEvent?.UserId, userEvent?.Action, userEvent?.Email);
                     break;
 
                 case "payment-events":
                     var paymentEvent = JsonSerializer.Deserialize<PaymentEvent>(message);
-                    _logger.LogInformation("💳 PaymentEvent processed: PaymentId={PaymentId}, Amount={Amount}, Status={Status}",
+                    _logger.LogInformation("PaymentEvent processed: PaymentId={PaymentId}, Amount={Amount}, Status={Status}",
                         paymentEvent?.PaymentId, paymentEvent?.Amount, paymentEvent?.Status);
                     break;
 
                 case "movie-events":
                     var movieEvent = JsonSerializer.Deserialize<MovieEvent>(message);
-                    _logger.LogInformation("🎬 MovieEvent processed: MovieId={MovieId}, Title={Title}, Action={Action}, Rating={Rating}",
+                    _logger.LogInformation("MovieEvent processed: MovieId={MovieId}, Title={Title}, Action={Action}, Rating={Rating}",
                         movieEvent?.MovieId, movieEvent?.Title, movieEvent?.Action, movieEvent?.Rating);
                     break;
             }
-
-            // Имитация обработки
+            _logger.LogInformation("Process");
             await Task.Delay(100);
         }
         catch (JsonException ex)
