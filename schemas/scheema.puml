@@ -1,0 +1,63 @@
+@startuml
+!includeurl https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4.puml
+!includeurl https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+Person(user, "Клиент", "Любитель кино и пиццы")
+
+System_Boundary(cinema_Abyss, "Онлайн кинотеатр «Кинобездна»") {
+
+  System_Boundary(front, "Клиентские приложения") {
+    Container(web_ui, "WEB UI", "Веб интерфейс клиента и адм.")
+    Container(mobiles, "Mobile devices", "Мобильные устройства")
+  }
+  
+ System_Boundary(back, "Бэкэнд система") {
+  
+    Container(api_gateway, "API Gateway")
+
+    Container(web_bff, "WEB BFF")
+    Container(mobiles_bff, "MOBILE BFF")
+
+    Container(identity_service, "Identity Service", "Авторизация, роли и доступ")
+
+    Container(video_service, "Video Service", "Видео хостинг")
+    Container(discounts_service, "Discounts Service", "Сервис скидок")
+    Container(payment_service, "Payment Service", "Интеграция с платежной системой")
+    Container(statistics_service, "Statistics service", "Телеметрия и отчетность")
+
+    ContainerDb(app_db, "Abyss DB", "PostgreeSQL", "Основная БД приложения")
+
+    
+    Rel(web_ui, api_gateway, "Rest Api")
+    Rel(mobiles, api_gateway, "Rest Api")
+    
+    Rel(api_gateway, web_bff, "OAuth2")
+    Rel(api_gateway, mobiles_bff, "Rest Api")
+    Rel(api_gateway, identity_service, "Rest Api")
+    
+    Rel(web_bff, video_service, "Rest Api")
+    Rel(web_bff, discounts_service, "Rest Api")
+    Rel(web_bff, payment_service, "Rest Api")
+    Rel(web_bff, statistics_service, "Rest Api")
+
+    Rel(mobiles_bff, video_service, "Rest Api")
+    Rel(mobiles_bff, discounts_service, "Rest Api")
+    Rel(mobiles_bff, payment_service, "Rest Api")
+    Rel(mobiles_bff, statistics_service, "Rest Api")
+
+    Rel(statistics_service, app_db, "SQL", "Read/Writes")
+    Rel(video_service, app_db, "SQL", "Read/Writes")
+    Rel(payment_service, app_db, "SQL", "Read/Writes")
+    Rel(identity_service, app_db, "SQL", "Read/Writes")
+    Rel(discounts_service, app_db, "SQL", "Read/Writes")
+  }
+}
+
+Container_Ext(recomendation_system,  "Recomendation System", "REST")
+Container_Ext(payment_system,        "Payment System", "REST")
+
+Rel(user, web_ui, "HTTPS", "Customer interface")
+Rel(user, mobiles, "HTTPS", "Customer interface")
+
+Rel(statistics_service, recomendation_system, "HTTPS", "Admin panel")
+Rel(payment_service, payment_system, "HTTPS", "Admin panel")
