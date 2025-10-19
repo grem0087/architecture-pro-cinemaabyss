@@ -41,7 +41,7 @@ public class EventConsumerService : BackgroundService
                     await Task.Delay(100);
                         continue;
                 };
-                
+                _logger.LogInformation(consumeResult.Message.Value);
                 await ProcessMessageAsync(consumeResult.Topic, consumeResult.Message.Value);
 
                 _consumer.StoreOffset(consumeResult);
