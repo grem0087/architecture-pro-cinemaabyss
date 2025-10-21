@@ -141,4 +141,4 @@ else
   echo "❌ Some tests failed. Check the reports for details."
 fi
 
-exit $EXIT_CODE
+pause
