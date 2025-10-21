@@ -13,19 +13,19 @@ System_Boundary(cinema_Abyss, "Онлайн кинотеатр «Кинобез�
   
  System_Boundary(back, "Бэкэнд система") {
   
-    Container(api_gateway, "API Gateway")
+    Container(api_gateway, "API Gateway","ocelot")
 
-    Container(web_bff, "WEB BFF")
-    Container(mobiles_bff, "MOBILE BFF")
+    Container(web_bff, "WEB BFF", "C#, Rest" )
+    Container(mobiles_bff, "MOBILE BFF", "C#, Rest")
 
-    Container(identity_service, "Identity Service", "Авторизация, роли и доступ")
+    Container(identity_service, "Identity Service", "Авторизация, роли и доступ", "Keycloak")
 
-    Container(video_service, "Video Service", "Видео хостинг")
-    Container(discounts_service, "Discounts Service", "Сервис скидок")
-    Container(payment_service, "Payment Service", "Интеграция с платежной системой")
-    Container(statistics_service, "Statistics service", "Телеметрия и отчетность")
+    Container(video_service, "Video Service", "Видео хостинг", "C#, Rest")
+    Container(discounts_service, "Discounts Service", "Сервис скидок", "C#, Rest")
+    Container(payment_service, "Payment Service", "Интеграция с платежной системой", "C#, Rest")
+    Container(statistics_service, "Statistics service", "Телеметрия и отчетность", "C#, Rest")
 
-    ContainerDb(app_db, "Abyss DB", "PostgreeSQL", "Основная БД приложения")
+    ContainerDb(app_db, "Abyss DB", "PostgreeSQL", "Основная БД приложения", "C#, Rest")
 
     
     Rel(web_ui, api_gateway, "Rest Api")
